@@ -1,0 +1,19 @@
+# base image
+FROM node:18.0.0-alpine AS build
+
+# set working directory
+WORKDIR /app
+COPY package.json ./
+# RUN npm install
+COPY . .
+RUN npm config set unsafe-perm true
+RUN npm i -g npm-check-updates
+# RUN npm-check-updates -u
+RUN npm install
+RUN npm run build
+
+
+FROM nginx:1.15.8-alpine AS prod-stage
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx","-g","daemon off; "]
